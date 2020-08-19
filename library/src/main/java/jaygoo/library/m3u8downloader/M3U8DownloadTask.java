@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
 
 import jaygoo.library.m3u8downloader.bean.M3U8;
 import jaygoo.library.m3u8downloader.bean.M3U8Ts;
+import jaygoo.library.m3u8downloader.utils.CommonUtils;
 import jaygoo.library.m3u8downloader.utils.M3U8Log;
 import jaygoo.library.m3u8downloader.utils.MUtils;
 /**
@@ -264,9 +265,12 @@ class M3U8DownloadTask {
                         FileOutputStream fos = null;
                         InputStream inputStream = null;
                         try {
+
                             URL url = new URL(m3U8Ts.obtainFullUrl(basePath));
+                            CommonUtils.log(url);
                             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                             conn.setConnectTimeout(connTimeout);
+                            conn.setRequestProperty("referer", "app2.kkkanju.com");
                             conn.setReadTimeout(readTimeout);
                             if (conn.getResponseCode() == 200) {
                                 if (isStartDownload){
@@ -335,6 +339,8 @@ class M3U8DownloadTask {
         if ("thread interrupted".equals(e.getMessage())) {
             return;
         }
+        e.printStackTrace();
+        CommonUtils.logStackTrace("handlerError");
         Message msg = Message.obtain();
         msg.obj = e;
         msg.what = WHAT_ON_ERROR;

@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.READ_EXTERNAL_STORAGE,
     };
 
-    M3U8Task[] taskList = new M3U8Task[5];
+    M3U8Task[] taskList = new M3U8Task[6];
     private VideoListAdapter adapter;
     private String dirPath;
     private String encryptKey = "63F06F99D823D33AAB89A0A93DECFEE0"; //get the key by AES128Utils.getAESKey()
@@ -91,16 +91,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initData(){
-        M3U8Task bean0 = new M3U8Task("http://hls.ciguang.tv/hdtv/video.m3u8");
+        M3U8Task bean0 = new M3U8Task("http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8");
         M3U8Task bean1 = new M3U8Task("http://pl-ali.youku.com/playlist/m3u8?ts=1524205957&keyframe=0&m3u8Md5=a85842b9ca4e77db4aa57c314c8e61c7&t1=200&pid=1133275aa6ac0891&vid=XMzU1MDY0NjEyMA==&type=flv&oip=1779113856&sid=0524205957937209643a0&token=2124&did=ae8263a35f7eaca76f68bb61436e6dac&ev=1&ctype=20&ep=YlUi3d%2BWQ%2F5shnijRhmbvlc%2FYJ8QmCsaCWAJ1RRpNbA%3D&ymovie=1");
         M3U8Task bean2 = new M3U8Task("https://media6.smartstudy.com/ae/07/3997/2/dest.m3u8");
         M3U8Task bean3 = new M3U8Task("https://www3.laqddc.com/hls/2018/04/07/BQ2cqpyZ/playlist.m3u8");
         M3U8Task bean4 = new M3U8Task("http://hcjs2ra2rytd8v8np1q.exp.bcevod.com/mda-hegtjx8n5e8jt9zv/mda-hegtjx8n5e8jt9zv.m3u8");
+        M3U8Task bean5 = new M3U8Task("http://static.jystarfod.com/group1/M00/60/E4/b0QEkl8hKUKAZ8RKAAClJDHRb4s25.m3u8");
         taskList[0] = bean0;
         taskList[1] = bean1;
         taskList[2] = bean2;
         taskList[3] = bean3;
         taskList[4] = bean4;
+        taskList[5] = bean5;
     }
 
     private OnM3U8DownloadListener onM3U8DownloadListener = new OnM3U8DownloadListener() {
