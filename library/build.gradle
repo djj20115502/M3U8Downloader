@@ -9,8 +9,6 @@ buildscript {
     }
 }
 
-apply plugin: 'com.github.dcendents.android-maven'
-group='com.github.Jay-Goo'
 
 android {
     compileSdkVersion 26
