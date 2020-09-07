@@ -12,6 +12,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import jaygoo.library.m3u8downloader.utils.CommonUtils;
+
 import static org.nanohttpd.protocols.http.response.Response.newFixedLengthResponse;
 
 
@@ -82,6 +84,8 @@ public class M3U8HttpServer extends NanoHTTPD {
 
     @Override
     public Response handle(IHTTPSession session) {
+        String url = String.valueOf(session.getUri());
+        CommonUtils.log(url);
         return super.handle(session);
     }
 
@@ -89,6 +93,7 @@ public class M3U8HttpServer extends NanoHTTPD {
     public Response serve(IHTTPSession session) {
         String url = String.valueOf(session.getUri());
 
+        CommonUtils.log(url);
         File file = new File(url);
 
         Response response = newFixedLengthResponse(Status.NOT_FOUND, "text/html", "文件不存在：" + url);

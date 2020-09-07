@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import java.net.URI;
 
+import jaygoo.library.m3u8downloader.utils.CommonUtils;
 import jaygoo.library.m3u8downloader.utils.MD5Utils;
 
 /**
@@ -43,6 +44,7 @@ public class M3U8Ts implements Comparable<M3U8Ts> {
     }
 
     public String obtainFullUrl(String hostUrl) {
+        CommonUtils.log(hostUrl);
         if (url == null) {
             return null;
         }
@@ -53,15 +55,18 @@ public class M3U8Ts implements Comparable<M3U8Ts> {
         } else {
             ///http://static.jystarfod.com/group1/M00/60/E4/b0QEkl8hKUKAZ8RKAAClJDHRb4s25.m3u8
             ///group1/M00/60/DF/b0QEkl8hKTOAEA25AAKZYHTznNo3097.ts
-            // 这样的相当于只能保留host
+            // 这样的相当于只能保留host  http://static.jystarfod.com/group1/M00/60/DF/b0QEkl8hKTOAEA25AAKZYHTznNo3097.ts
             if (url.split("/").length > 2) {
                 URI uri = URI.create(hostUrl);
                 String[] ss = hostUrl.split(uri.getHost());
+                CommonUtils.log(ss[0]);
+                CommonUtils.log(ss[0].concat(uri.getHost()).concat(url));
                 return ss[0].concat(uri.getHost()).concat(url);
             }
             return hostUrl.concat(url);
         }
     }
+
 
     @Override
     public String toString() {

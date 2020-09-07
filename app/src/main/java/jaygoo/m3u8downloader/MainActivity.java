@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         M3U8Task bean2 = new M3U8Task("https://media6.smartstudy.com/ae/07/3997/2/dest.m3u8");
         M3U8Task bean3 = new M3U8Task("https://www3.laqddc.com/hls/2018/04/07/BQ2cqpyZ/playlist.m3u8");
         M3U8Task bean4 = new M3U8Task("http://hcjs2ra2rytd8v8np1q.exp.bcevod.com/mda-hegtjx8n5e8jt9zv/mda-hegtjx8n5e8jt9zv.m3u8");
-        M3U8Task bean5 = new M3U8Task("http://static.jystarfod.com/group1/M00/60/E4/b0QEkl8hKUKAZ8RKAAClJDHRb4s25.m3u8");
+        M3U8Task bean5 = new M3U8Task("http://static.jystarfod.com/group1/M00/7B/EF/b0QEkl9RqPuAL2tMAAAhOdT7GoA72.m3u8");
         taskList[0] = bean0;
         taskList[1] = bean1;
         taskList[2] = bean2;

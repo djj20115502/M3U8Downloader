@@ -1,9 +1,6 @@
 package jaygoo.library.m3u8downloader.bean;
 
-import android.text.TextUtils;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import jaygoo.library.m3u8downloader.utils.MUtils;
@@ -17,6 +14,10 @@ import jaygoo.library.m3u8downloader.utils.MUtils;
  * ================================================
  */
 public class M3U8 {
+
+
+    private String header;//顶部信息   不含key
+    private String key;//
     private String basePath;//去除后缀文件名的url
     private String m3u8FilePath;//m3u8索引文件路径
     private String dirFilePath;//切片文件目录
@@ -50,7 +51,7 @@ public class M3U8 {
 
     public long getFileSize() {
         fileSize = 0;
-        for (M3U8Ts m3U8Ts : tsList){
+        for (M3U8Ts m3U8Ts : tsList) {
             fileSize = fileSize + m3U8Ts.getFileSize();
         }
         return fileSize;
@@ -58,7 +59,7 @@ public class M3U8 {
 
     public String getFormatFileSize() {
         fileSize = getFileSize();
-        if (fileSize == 0)return "";
+        if (fileSize == 0) return "";
         return MUtils.formatFileSize(fileSize);
     }
 
@@ -78,23 +79,40 @@ public class M3U8 {
         this.tsList.add(ts);
     }
 
-    public long getTotalTime(){
+    public void setHeader(String header) {
+        this.header = header;
+    }
+
+    public String getHeader() {
+        return header;
+    }
+
+    public long getTotalTime() {
         totalTime = 0;
-        for (M3U8Ts m3U8Ts : tsList){
-            totalTime = totalTime + (int)(m3U8Ts.getSeconds() * 1000);
+        for (M3U8Ts m3U8Ts : tsList) {
+            totalTime = totalTime + (int) (m3U8Ts.getSeconds() * 1000);
         }
         return totalTime;
     }
+    public String getKey() {
+        return key;
+    }
 
+    public void setKey(String key) {
+        this.key = key;
+    }
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        sb.append("\nheader: " + header);
+        sb.append("\n" + key);
         sb.append("basePath: " + basePath);
         sb.append("\nm3u8FilePath: " + m3u8FilePath);
         sb.append("\ndirFilePath: " + dirFilePath);
         sb.append("\nfileSize: " + getFileSize());
         sb.append("\nfileFormatSize: " + MUtils.formatFileSize(fileSize));
         sb.append("\ntotalTime: " + totalTime);
+
 
         for (M3U8Ts ts : tsList) {
             sb.append("\nts: " + ts);
@@ -104,9 +122,9 @@ public class M3U8 {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof M3U8){
-            M3U8 m3U8 = (M3U8)obj;
-            if (basePath != null && basePath.equals(m3U8.basePath))return true;
+        if (obj instanceof M3U8) {
+            M3U8 m3U8 = (M3U8) obj;
+            if (basePath != null && basePath.equals(m3U8.basePath)) return true;
         }
         return false;
     }

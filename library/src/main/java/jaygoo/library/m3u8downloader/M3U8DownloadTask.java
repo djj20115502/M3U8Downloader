@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -21,6 +22,7 @@ import jaygoo.library.m3u8downloader.bean.M3U8Ts;
 import jaygoo.library.m3u8downloader.utils.CommonUtils;
 import jaygoo.library.m3u8downloader.utils.M3U8Log;
 import jaygoo.library.m3u8downloader.utils.MUtils;
+
 /**
  * ================================================
  * 作    者：JayGoo
@@ -103,7 +105,7 @@ class M3U8DownloadTask {
         }
     });
 
-    public M3U8DownloadTask(){
+    public M3U8DownloadTask() {
         connTimeout = M3U8DownloaderConfig.getConnTimeout();
         readTimeout = M3U8DownloaderConfig.getReadTimeout();
         threadCount = M3U8DownloaderConfig.getThreadCount();
@@ -117,7 +119,7 @@ class M3U8DownloadTask {
      */
     public void download(final String url, OnTaskDownloadListener onTaskDownloadListener) {
         saveDir = MUtils.getSaveFileDir(url);
-        M3U8Log.d("start download ,SaveDir: "+ saveDir);
+        M3U8Log.d("start download ,SaveDir: " + saveDir);
         this.onTaskDownloadListener = onTaskDownloadListener;
         if (!isRunning()) {
             getM3U8Info(url);
@@ -127,11 +129,11 @@ class M3U8DownloadTask {
     }
 
 
-    public void setEncryptKey(String encryptKey){
+    public void setEncryptKey(String encryptKey) {
         this.encryptKey = encryptKey;
     }
 
-    public String getEncryptKey(){
+    public String getEncryptKey() {
         return encryptKey;
     }
 
@@ -152,10 +154,12 @@ class M3U8DownloadTask {
      */
     private void getM3U8Info(String url) {
 
+        CommonUtils.log(url);
         M3U8InfoManger.getInstance().getM3U8Info(url, new OnM3U8InfoListener() {
             @Override
             public void onSuccess(final M3U8 m3U8) {
                 currentM3U8 = m3U8;
+                CommonUtils.log(currentM3U8);
                 new Thread() {
                     @Override
                     public void run() {
@@ -208,6 +212,7 @@ class M3U8DownloadTask {
      * 开始下载
      * 关于断点续传，每个任务会根据url进行生成相应Base64目录
      * 如果任务已经停止、开始下载之前，下一次会判断相关任务目录中已经下载完成的ts文件是否已经下载过了，下载了就不再下载
+     *
      * @param m3U8
      */
     private void startDownload(final M3U8 m3U8) {
@@ -246,6 +251,71 @@ class M3U8DownloadTask {
                 onTaskDownloadListener.onProgress(curLength);
             }
         }, 0, 1500);
+        if (m3U8.getKey() != null) {
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    File file;
+                    try {
+                        String fileName = M3U8EncryptHelper.encryptFileName(encryptKey, "thekey.key");
+                        file = new File(dir + File.separator + fileName);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return;
+                    }
+                    if (file.exists()) {
+                        return;
+                    }
+                    FileOutputStream fos = null;
+                    InputStream inputStream = null;
+                    String key = m3U8.getKey().split("\"")[1];
+                    CommonUtils.log(key);
+                    try {
+                        URL url = new URL(obtainFullUrl(key, basePath));
+                        CommonUtils.log(url);
+                        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                        conn.setConnectTimeout(connTimeout);
+                        conn.setRequestProperty("referer", "app2.kkkanju.com");
+                        conn.setReadTimeout(readTimeout);
+                        if (conn.getResponseCode() == 200) {
+                            if (isStartDownload) {
+                                isStartDownload = false;
+                                mHandler.sendEmptyMessage(WHAT_ON_START_DOWNLOAD);
+                            }
+                            inputStream = conn.getInputStream();
+                            fos = new FileOutputStream(file);//会自动创建文件
+                            int len = 0;
+                            byte[] buf = new byte[8 * 1024 * 1024];
+                            while ((len = inputStream.read(buf)) != -1) {
+                                curLength += len;
+                                fos.write(buf, 0, len);//写入流中
+                            }
+                        } else {
+                            handlerError(new Throwable(String.valueOf(conn.getResponseCode())));
+                        }
+                    } catch (MalformedURLException e) {
+                        handlerError(e);
+                    } catch (IOException e) {
+                        handlerError(e);
+                    } catch (Exception e) {
+                        handlerError(e);
+                    } finally {//关流
+                        if (inputStream != null) {
+                            try {
+                                inputStream.close();
+                            } catch (IOException e) {
+                            }
+                        }
+                        if (fos != null) {
+                            try {
+                                fos.close();
+                            } catch (IOException e) {
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
         for (final M3U8Ts m3U8Ts : m3U8.getTsList()) {//循环下载
             executor.execute(new Runnable() {
@@ -273,7 +343,7 @@ class M3U8DownloadTask {
                             conn.setRequestProperty("referer", "app2.kkkanju.com");
                             conn.setReadTimeout(readTimeout);
                             if (conn.getResponseCode() == 200) {
-                                if (isStartDownload){
+                                if (isStartDownload) {
                                     isStartDownload = false;
                                     mHandler.sendEmptyMessage(WHAT_ON_START_DOWNLOAD);
                                 }
@@ -294,9 +364,7 @@ class M3U8DownloadTask {
                             handlerError(e);
                         } catch (Exception e) {
                             handlerError(e);
-                        }
-                        finally
-                        {//关流
+                        } finally {//关流
                             if (inputStream != null) {
                                 try {
                                     inputStream.close();
@@ -315,8 +383,8 @@ class M3U8DownloadTask {
                         m3U8Ts.setFileSize(itemFileSize);
                         mHandler.sendEmptyMessage(WHAT_ON_PROGRESS);
                         curTs++;
-                    }else {
-                        curTs ++;
+                    } else {
+                        curTs++;
                         itemFileSize = file.length();
                         m3U8Ts.setFileSize(itemFileSize);
                     }
@@ -325,6 +393,29 @@ class M3U8DownloadTask {
         }
     }
 
+    public String obtainFullUrl(String url, String host) {
+        CommonUtils.log(host);
+        if (url == null) {
+            return null;
+        }
+        if (url.startsWith("http")) {
+            return url;
+        } else if (url.startsWith("//")) {
+            return "http:".concat(url);
+        } else {
+            ///http://static.jystarfod.com/group1/M00/60/E4/b0QEkl8hKUKAZ8RKAAClJDHRb4s25.m3u8
+            ///group1/M00/60/DF/b0QEkl8hKTOAEA25AAKZYHTznNo3097.ts
+            // 这样的相当于只能保留host  http://static.jystarfod.com/group1/M00/60/DF/b0QEkl8hKTOAEA25AAKZYHTznNo3097.ts
+            if (url.split("/").length > 2) {
+                URI uri = URI.create(host);
+                String[] ss = host.split(uri.getHost());
+                CommonUtils.log(ss[0]);
+                CommonUtils.log(ss[0].concat(uri.getHost()).concat(url));
+                return ss[0].concat(uri.getHost()).concat(url);
+            }
+            return host.concat(url);
+        }
+    }
 
     /**
      * 通知异常
@@ -361,10 +452,10 @@ class M3U8DownloadTask {
         }
     }
 
-    public File getM3u8File(String url){
+    public File getM3u8File(String url) {
         try {
             return new File(MUtils.getSaveFileDir(url), m3u8FileName);
-        }catch (Exception e){
+        } catch (Exception e) {
             M3U8Log.e(e.getMessage());
         }
         return null;
