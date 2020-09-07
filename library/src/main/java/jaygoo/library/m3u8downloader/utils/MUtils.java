@@ -58,7 +58,7 @@ public class MUtils {
                     headerEnd = true;
                     ret.setKey(line);
                 } else if (!headerEnd) {
-                    header.append("\n").append(line);
+                    header.append(line).append("\n");
                 }
                 continue;
             }
@@ -124,7 +124,7 @@ public class MUtils {
     public static File createLocalM3U8(File m3u8Dir, String fileName, M3U8 m3U8) throws IOException {
         File m3u8File = new File(m3u8Dir, fileName);
         BufferedWriter bfw = new BufferedWriter(new FileWriter(m3u8File, false));
-        bfw.write(m3U8.getHeader() + "\n");
+        bfw.write(m3U8.getHeader());
         if (m3U8.getKey() != null) {
             String[] strings = m3U8.getKey().split("\"");
             bfw.write(strings[0] + "\"thekey.key\"" + strings[2] + "\n");
