@@ -114,6 +114,13 @@ public class MUtils {
         }
     }
 
+    /**
+     * 格式化文件大小
+     */
+    public static String formatFileSize(String size) {
+        return formatFileSize(Long.parseLong(size));
+    }
+
 
     /**
      * 生成AES-128加密本地m3u8索引文件，ts切片和m3u8文件放在相同目录下即可
